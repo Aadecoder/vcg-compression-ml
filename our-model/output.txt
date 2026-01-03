@@ -1,0 +1,768 @@
+…/vcg_compression/our-model ✗ python3 ./vcg_compression_ml.py
+2026-01-03 17:19:59.565232: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-01-03 17:19:59.565744: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-03 17:19:59.638287: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-01-03 17:20:01.375103: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-03 17:20:01.375516: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+======================================================================
+VCG SIGNAL COMPRESSION USING CNN-LSTM AUTOENCODER
+======================================================================
+
+[STEP 1] Converting ECG to VCG...
+  Found PTB database at: ../ptb-diagnostic-ecg-database-1.0.0
+  Processing records...
+Found 290 patient directories
+Processing 1: patient001/s0010_re
+Processing 2: patient001/s0014lre
+Processing 3: patient001/s0016lre
+Processing 4: patient002/s0015lre
+Processing 5: patient003/s0017lre
+Processing 6: patient004/s0020are
+Processing 7: patient004/s0020bre
+Processing 8: patient005/s0021are
+Processing 9: patient005/s0021bre
+Processing 10: patient005/s0025lre
+Processing 11: patient005/s0031lre
+Processing 12: patient005/s0101lre
+Processing 13: patient006/s0022lre
+Processing 14: patient006/s0027lre
+Processing 15: patient006/s0064lre
+Processing 16: patient007/s0026lre
+Processing 17: patient007/s0029lre
+Processing 18: patient007/s0038lre
+Processing 19: patient007/s0078lre
+Processing 20: patient008/s0028lre
+Processing 21: patient008/s0037lre
+Processing 22: patient008/s0068lre
+Processing 23: patient009/s0035_re
+Processing 24: patient010/s0036lre
+Processing 25: patient010/s0042lre
+Processing 26: patient010/s0061lre
+Processing 27: patient011/s0039lre
+Processing 28: patient011/s0044lre
+Processing 29: patient011/s0049lre
+Processing 30: patient011/s0067lre
+Processing 31: patient012/s0043lre
+Processing 32: patient012/s0050lre
+Processing 33: patient013/s0045lre
+Processing 34: patient013/s0051lre
+Processing 35: patient013/s0072lre
+Processing 36: patient014/s0046lre
+Processing 37: patient014/s0056lre
+Processing 38: patient014/s0071lre
+Processing 39: patient015/s0047lre
+Processing 40: patient015/s0057lre
+Processing 41: patient015/s0152lre
+Processing 42: patient016/s0052lre
+Processing 43: patient016/s0060lre
+Processing 44: patient016/s0076lre
+Processing 45: patient017/s0053lre
+Processing 46: patient017/s0055lre
+Processing 47: patient017/s0063lre
+Processing 48: patient017/s0075lre
+Processing 49: patient018/s0054lre
+Processing 50: patient018/s0059lre
+
+Successfully processed 50 records
+Total VCG data shape: (5516722, 3)
+Data saved to: vcg_data
+
+[STEP 2] Preprocessing VCG signals...
+
+[STEP 3] Preparing training dataset...
+  Found 50 VCG files
+Training samples: 7446
+Test samples: 1315
+Window shape: (1250, 3)
+
+  Dataset Statistics:
+    Training samples: 7446
+    Test samples: 1315
+    Signal range: [-7.842, 8.414]
+    Signal std: 0.998
+
+[STEP 4] Building CNN-LSTM Autoencoder...
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1767441006.268977   28507 cuda_executor.cc:1309] INTERNAL: CUDA Runtime error: Failed call to cudaGetRuntimeVersion: Error loading CUDA libraries. GPU will not be used.: Error loading CUDA libraries. GPU will not be used.
+W0000 00:00:1767441006.281896   28507 gpu_device.cc:2342] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+
+======================================================================
+ENCODER ARCHITECTURE
+======================================================================
+Model: "encoder"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                         ┃ Output Shape                ┃         Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ encoder_input (InputLayer)           │ (None, 1250, 3)             │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_conv1 (Conv1D)               │ (None, 1250, 32)            │             512 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_bn1 (BatchNormalization)     │ (None, 1250, 32)            │             128 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_relu1 (ReLU)                 │ (None, 1250, 32)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_pool1 (MaxPooling1D)         │ (None, 625, 32)             │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_conv2 (Conv1D)               │ (None, 625, 64)             │          10,304 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_bn2 (BatchNormalization)     │ (None, 625, 64)             │             256 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_relu2 (ReLU)                 │ (None, 625, 64)             │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_pool2 (MaxPooling1D)         │ (None, 312, 64)             │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_conv3 (Conv1D)               │ (None, 312, 128)            │          41,088 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_bn3 (BatchNormalization)     │ (None, 312, 128)            │             512 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_relu3 (ReLU)                 │ (None, 312, 128)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_pool3 (MaxPooling1D)         │ (None, 156, 128)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_lstm1 (LSTM)                 │ (None, 156, 128)            │         131,584 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_lstm_bn1                     │ (None, 156, 128)            │             512 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_lstm2 (LSTM)                 │ (None, 156, 128)            │         131,584 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_lstm_bn2                     │ (None, 156, 128)            │             512 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_lstm3 (LSTM)                 │ (None, 64)                  │          49,408 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder_lstm_bn3                     │ (None, 64)                  │             256 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ bottleneck (Dense)                   │ (None, 125)                 │           8,125 │
+└──────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+ Total params: 374,781 (1.43 MB)
+ Trainable params: 373,693 (1.43 MB)
+ Non-trainable params: 1,088 (4.25 KB)
+
+======================================================================
+DECODER ARCHITECTURE
+======================================================================
+Model: "decoder"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                         ┃ Output Shape                ┃         Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ decoder_input (InputLayer)           │ (None, 125)                 │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_dense (Dense)                │ (None, 9984)                │       1,257,984 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_reshape (Reshape)            │ (None, 156, 64)             │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_lstm1 (LSTM)                 │ (None, 156, 64)             │          33,024 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_lstm_bn1                     │ (None, 156, 64)             │             256 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_lstm2 (LSTM)                 │ (None, 156, 128)            │          98,816 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_lstm_bn2                     │ (None, 156, 128)            │             512 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_lstm3 (LSTM)                 │ (None, 156, 128)            │         131,584 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_lstm_bn3                     │ (None, 156, 128)            │             512 │
+│ (BatchNormalization)                 │                             │                 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_upsample1 (UpSampling1D)     │ (None, 312, 128)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_conv1 (Conv1DTranspose)      │ (None, 312, 128)            │          82,048 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_bn1 (BatchNormalization)     │ (None, 312, 128)            │             512 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_relu1 (ReLU)                 │ (None, 312, 128)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_upsample2 (UpSampling1D)     │ (None, 624, 128)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_conv2 (Conv1DTranspose)      │ (None, 624, 64)             │          41,024 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_bn2 (BatchNormalization)     │ (None, 624, 64)             │             256 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_relu2 (ReLU)                 │ (None, 624, 64)             │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_upsample3 (UpSampling1D)     │ (None, 1248, 64)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_conv3 (Conv1DTranspose)      │ (None, 1248, 32)            │          10,272 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_bn3 (BatchNormalization)     │ (None, 1248, 32)            │             128 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_relu3 (ReLU)                 │ (None, 1248, 32)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_padding (ZeroPadding1D)      │ (None, 1250, 32)            │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder_output (Conv1D)              │ (None, 1250, 3)             │             291 │
+└──────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+ Total params: 1,657,219 (6.32 MB)
+ Trainable params: 1,656,131 (6.32 MB)
+ Non-trainable params: 1,088 (4.25 KB)
+
+======================================================================
+COMPLETE AUTOENCODER
+======================================================================
+Model: "vcg_autoencoder"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+┃ Layer (type)                         ┃ Output Shape                ┃         Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+│ autoencoder_input (InputLayer)       │ (None, 1250, 3)             │               0 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ encoder (Functional)                 │ (None, 125)                 │         374,781 │
+├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+│ decoder (Functional)                 │ (None, 1250, 3)             │       1,657,219 │
+└──────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+ Total params: 2,032,000 (7.75 MB)
+ Trainable params: 2,029,824 (7.74 MB)
+ Non-trainable params: 2,176 (8.50 KB)
+
+Model compiled with:
+  - Optimizer: Adam (lr=0.001)
+  - Loss: MSE
+  - Bottleneck size: 125
+  - Compression ratio: ~30:1
+
+[STEP 5] Training model...
+
+Starting training...
+  - Training samples: 7446
+  - Validation samples: 1315
+  - Epochs: 120
+  - Batch size: 32
+  - Input range: [-7.842, 8.414]
+Epoch 1/120
+2026-01-03 17:20:19.480105: E tensorflow/core/util/util.cc:131] oneDNN supports DT_INT32 only on platforms with AVX-512. Falling back to the default Eigen-based implementation if present.
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 636ms/step - loss: 0.8239 - mae: 0.6044  
+Epoch 1: val_loss improved from None to 0.61312, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 683ms/step - loss: 0.6919 - mae: 0.5308 - val_loss: 0.6131 - val_mae: 0.4797 - learning_rate: 0.0010
+Epoch 2/120                      206/233 ━━━━━━━━━━━━━━━━━━━━ 17s 647ms/step - loss: 0.6101 - mae: 207/233 ━━━━━━━━━━━━━━━━━━━━ 16s 648ms/step - loss: 0.6101 - mae: 208/233 ━━━━━━━━━━━━━━━━━━━━ 16s 648ms/step - loss: 0.6101 - mae: 209/233 ━━━━━━━━━━━━━━━━━━━━ 15s 648ms/step - loss: 0.6100 - mae: 210/233 ━━━━━━━━━━━━━━━━━━━━ 14s 648ms/step - loss: 0.6100 - mae: 211/233 ━━━━━━━━━━━━━━━━━━━━ 14s 648ms/step - loss: 0.6100 - mae: 212/233 ━━━━━━━━━━━━━━━━━━━━ 13s 648ms/step - loss: 0.6099 - mae: 213/233 ━━━━━━━━━━━━━━━━━━━━ 12s 648ms/step - loss: 0.6099 - mae: 214/233 ━━━━━━━━━━━━━━━━━━━━ 12s 648ms/step - loss: 0.6099 - mae: 215/233 ━━━━━━━━━━━━━━━━━━━━ 11s 648ms/step - loss: 0.6099 - mae: 216/233 ━━━━━━━━━━━━━━━━━━━━ 11s 648ms/step - loss: 0.6098 - mae: 217/233 ━━━━━━━━━━━━━━━━━━━━ 10s 648ms/step - loss: 0.6098 - mae: 218/233 ━━━━━━━━━━━━━━━━━━━━ 9s 649ms/step - loss: 0.6098 - mae: 0219/233 ━━━━━━━━━━━━━━━━━━━━ 9s 648ms/step - loss: 0.6097 - mae: 0220/233 ━━━━━━━━━━━━━━━━━━━━ 8s 648ms/step - loss: 0.6097 - mae: 0221/233 ━━━━━━━━━━━━━━━━━━━━ 7s 648ms/step - loss: 0.6097 - mae: 0222/233 ━━━━━━━━━━━━━━━━━━━━ 7s 649ms/step - loss: 0.6097 - mae: 0223/233 ━━━━━━━━━━━━━━━━━━━━ 6s 649ms/step - loss: 0.6096 - mae: 0224/233 ━━━━━━━━━━━━━━━━━━━━ 5s 648ms/step - loss: 0.6096 - mae: 0225/233 ━━━━━━━━━━━━━━━━━━━━ 5s 649ms/step - loss: 0.6096 - mae: 0226/233 ━━━━━━━━━━━━━━━━━━━━ 4s 648ms/step - loss: 0.6095 - mae: 0227/233 ━━━━━━━━━━━━━━━━━━━━ 3s 648ms/step - loss: 0.6095 - mae: 0228/233 ━━━━━━━━━━━━━━━━━━━━ 3s 648ms/step - loss: 0.6095 - mae: 0229/233 ━━━━━━━━━━━━━━━━━━━━ 2s 648ms/step - loss: 0.6095 - mae: 0230/233 ━━━━━━━━━━━━━━━━━━━━ 1s 648ms/step - loss: 0.6094 - mae: 0231/233 ━━━━━━━━━━━━━━━━━━━━ 1s 648ms/step - loss: 0.6094 - mae: 0232/233 ━━━━━━━━━━━━━━━━━━━━ 0s 648ms/step - loss: 0.6094 - mae: 0233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 648ms/step - loss: 0.6094 - mae: 0.4731
+Epoch 2: val_loss improved from 0.61312 to 0.55751, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 161s 689ms/step - loss: 0.6027 - mae: 0.4695 - val_loss: 0.5575 - val_mae: 0.4278 - learning_rate: 0.0010
+Epoch 3/120
+  1/233 ━━━━━━━━━━━━━━━━━━━━ 2:31 652ms/step - loss: 0.5646 - mae:  2/233 ━━━━━━━━━━━━━━━━━━━━ 2:28 641ms/step - loss: 0.5711 - mae:  3/233 ━━━━━━━━━━━━━━━━━━━━ 2:28 644ms/step - loss: 0.5687 - mae:  4/233 ━━━━━━━━━━━━━━━━━━━━ 2:36 682ms/step - loss: 0.5653 - mae: 13/233 ━━━━━━━━━━━━━━━━━━━━ 2:28 673ms/step - loss: 0.5700 - mae: 14/233 ━━━━━━━━━━━━━━━━━━━━ 2:27 675ms/step - loss: 0.5709 - mae: 15/233 ━━━━━━━━━━━━━━━━━━━━ 2:26 672ms/step - loss: 0.5714 - mae: 16/233 ━━━━━━━━━━━━━━━━━━━━ 2:25 670ms/step - loss: 0.5719 - mae:233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 691ms/step - loss: 0.5923 - mae: 0.4624  
+Epoch 3: val_loss did not improve from 0.55751
+233/233 ━━━━━━━━━━━━━━━━━━━━ 171s 734ms/step - loss: 0.5917 - mae: 0.4619 - val_loss: 0.5737 - val_mae: 0.4278 - learning_rate: 0.0010
+Epoch 4/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 634ms/step - loss: 0.5847 - mae: 0.4543  
+Epoch 4: val_loss did not improve from 0.55751
+233/233 ━━━━━━━━━━━━━━━━━━━━ 158s 677ms/step - loss: 0.5864 - mae: 0.4579 - val_loss: 0.5937 - val_mae: 0.4495 - learning_rate: 0.0010
+Epoch 5/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 674ms/step - loss: 0.5848 - mae: 0.4616  
+Epoch 5: val_loss did not improve from 0.55751
+233/233 ━━━━━━━━━━━━━━━━━━━━ 168s 722ms/step - loss: 0.5994 - mae: 0.4695 - val_loss: 0.6783 - val_mae: 0.5275 - learning_rate: 0.0010
+Epoch 6/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 683ms/step - loss: 0.6293 - mae: 0.4912  
+Epoch 6: val_loss improved from 0.55751 to 0.55426, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 169s 724ms/step - loss: 0.6077 - mae: 0.4773 - val_loss: 0.5543 - val_mae: 0.4203 - learning_rate: 0.0010
+Epoch 7/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 681ms/step - loss: 0.5865 - mae: 0.4617  
+Epoch 7: val_loss improved from 0.55426 to 0.53287, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 169s 725ms/step - loss: 0.5775 - mae: 0.4551 - val_loss: 0.5329 - val_mae: 0.4190 - learning_rate: 0.0010
+Epoch 8/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 648ms/step - loss: 0.5699 - mae: 0.4467  
+Epoch 8: val_loss did not improve from 0.53287
+233/233 ━━━━━━━━━━━━━━━━━━━━ 160s 688ms/step - loss: 0.5669 - mae: 0.4467 - val_loss: 0.5410 - val_mae: 0.4200 - learning_rate: 0.0010
+Epoch 9/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 682ms/step - loss: 0.5650 - mae: 0.4452  
+Epoch 9: val_loss improved from 0.53287 to 0.53155, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 168s 721ms/step - loss: 0.5591 - mae: 0.4409 - val_loss: 0.5315 - val_mae: 0.4117 - learning_rate: 0.0010
+Epoch 10/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 674ms/step - loss: 0.5517 - mae: 0.4360  
+Epoch 10: val_loss improved from 0.53155 to 0.50719, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 167s 718ms/step - loss: 0.5529 - mae: 0.4366 - val_loss: 0.5072 - val_mae: 0.3840 - learning_rate: 0.0010
+Epoch 11/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 676ms/step - loss: 0.5576 - mae: 0.4392  
+Epoch 11: val_loss did not improve from 0.50719
+233/233 ━━━━━━━━━━━━━━━━━━━━ 168s 720ms/step - loss: 0.5538 - mae: 0.4377 - val_loss: 0.5175 - val_mae: 0.4018 - learning_rate: 0.0010
+Epoch 12/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 656ms/step - loss: 0.5506 - mae: 0.4340  
+Epoch 12: val_loss did not improve from 0.50719
+233/233 ━━━━━━━━━━━━━━━━━━━━ 162s 697ms/step - loss: 0.5498 - mae: 0.4357 - val_loss: 0.5293 - val_mae: 0.4191 - learning_rate: 0.0010
+Epoch 13/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 680ms/step - loss: 0.5429 - mae: 0.4301  
+Epoch 13: val_loss improved from 0.50719 to 0.50169, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 168s 721ms/step - loss: 0.5440 - mae: 0.4323 - val_loss: 0.5017 - val_mae: 0.3847 - learning_rate: 0.0010
+Epoch 14/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 657ms/step - loss: 0.5519 - mae: 0.4401  
+Epoch 14: val_loss did not improve from 0.50169
+233/233 ━━━━━━━━━━━━━━━━━━━━ 163s 700ms/step - loss: 0.5529 - mae: 0.4403 - val_loss: 0.5191 - val_mae: 0.4176 - learning_rate: 0.0010
+Epoch 15/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 675ms/step - loss: 0.5417 - mae: 0.4329  
+Epoch 15: val_loss did not improve from 0.50169
+233/233 ━━━━━━━━━━━━━━━━━━━━ 167s 717ms/step - loss: 0.5427 - mae: 0.4343 - val_loss: 0.5107 - val_mae: 0.3981 - learning_rate: 0.0010
+Epoch 16/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 688ms/step - loss: 0.5371 - mae: 0.4314  
+Epoch 16: val_loss improved from 0.50169 to 0.48726, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 737ms/step - loss: 0.5317 - mae: 0.4270 - val_loss: 0.4873 - val_mae: 0.3785 - learning_rate: 0.0010
+Epoch 17/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 685ms/step - loss: 0.5284 - mae: 0.4216  
+Epoch 17: val_loss improved from 0.48726 to 0.48049, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 170s 727ms/step - loss: 0.5273 - mae: 0.4246 - val_loss: 0.4805 - val_mae: 0.3720 - learning_rate: 0.0010
+Epoch 18/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 655ms/step - loss: 0.5293 - mae: 0.4310  
+Epoch 18: val_loss improved from 0.48049 to 0.47623, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 163s 701ms/step - loss: 0.5208 - mae: 0.4235 - val_loss: 0.4762 - val_mae: 0.3864 - learning_rate: 0.0010
+Epoch 19/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 706ms/step - loss: 0.5061 - mae: 0.4168  
+Epoch 19: val_loss improved from 0.47623 to 0.46359, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 174s 748ms/step - loss: 0.5052 - mae: 0.4162 - val_loss: 0.4636 - val_mae: 0.3826 - learning_rate: 0.0010
+Epoch 20/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 685ms/step - loss: 0.5004 - mae: 0.4165  
+Epoch 20: val_loss did not improve from 0.46359
+233/233 ━━━━━━━━━━━━━━━━━━━━ 171s 732ms/step - loss: 0.4975 - mae: 0.4132 - val_loss: 0.4842 - val_mae: 0.4065 - learning_rate: 0.0010
+Epoch 21/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 694ms/step - loss: 0.4943 - mae: 0.4102  
+Epoch 21: val_loss did not improve from 0.46359
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 736ms/step - loss: 0.4904 - mae: 0.4099 - val_loss: 0.4754 - val_mae: 0.3984 - learning_rate: 0.0010
+Epoch 22/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 700ms/step - loss: 0.4853 - mae: 0.4125  
+Epoch 22: val_loss improved from 0.46359 to 0.42535, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 174s 748ms/step - loss: 0.4809 - mae: 0.4074 - val_loss: 0.4253 - val_mae: 0.3549 - learning_rate: 0.0010
+Epoch 23/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 693ms/step - loss: 0.4669 - mae: 0.3987  
+Epoch 23: val_loss did not improve from 0.42535
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 739ms/step - loss: 0.4665 - mae: 0.3985 - val_loss: 0.4307 - val_mae: 0.3632 - learning_rate: 0.0010
+Epoch 24/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 673ms/step - loss: 0.4606 - mae: 0.3950  
+Epoch 24: val_loss improved from 0.42535 to 0.40757, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 167s 716ms/step - loss: 0.4522 - mae: 0.3919 - val_loss: 0.4076 - val_mae: 0.3512 - learning_rate: 0.0010
+Epoch 25/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 699ms/step - loss: 0.4440 - mae: 0.3881  
+Epoch 25: val_loss improved from 0.40757 to 0.40273, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 740ms/step - loss: 0.4407 - mae: 0.3857 - val_loss: 0.4027 - val_mae: 0.3474 - learning_rate: 0.0010
+Epoch 26/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 712ms/step - loss: 0.4379 - mae: 0.3857  
+Epoch 26: val_loss improved from 0.40273 to 0.37804, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 176s 756ms/step - loss: 0.4309 - mae: 0.3803 - val_loss: 0.3780 - val_mae: 0.3258 - learning_rate: 0.0010
+Epoch 27/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 704ms/step - loss: 0.4313 - mae: 0.3822  
+Epoch 27: val_loss did not improve from 0.37804
+233/233 ━━━━━━━━━━━━━━━━━━━━ 174s 746ms/step - loss: 0.4246 - mae: 0.3787 - val_loss: 0.3808 - val_mae: 0.3251 - learning_rate: 0.0010
+Epoch 28/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 684ms/step - loss: 0.4142 - mae: 0.3715  
+Epoch 28: val_loss improved from 0.37804 to 0.35807, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 170s 728ms/step - loss: 0.4104 - mae: 0.3702 - val_loss: 0.3581 - val_mae: 0.3373 - learning_rate: 0.0010
+Epoch 29/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 726ms/step - loss: 0.3989 - mae: 0.3682  
+Epoch 29: val_loss did not improve from 0.35807
+233/233 ━━━━━━━━━━━━━━━━━━━━ 180s 772ms/step - loss: 0.4001 - mae: 0.3670 - val_loss: 0.3600 - val_mae: 0.3244 - learning_rate: 0.0010
+Epoch 30/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 692ms/step - loss: 0.3932 - mae: 0.3656  
+Epoch 30: val_loss improved from 0.35807 to 0.33287, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 736ms/step - loss: 0.3951 - mae: 0.3664 - val_loss: 0.3329 - val_mae: 0.2969 - learning_rate: 0.0010
+Epoch 31/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 695ms/step - loss: 0.3798 - mae: 0.3574  
+Epoch 31: val_loss did not improve from 0.33287
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 738ms/step - loss: 0.3782 - mae: 0.3574 - val_loss: 0.3337 - val_mae: 0.3061 - learning_rate: 0.0010
+Epoch 32/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 700ms/step - loss: 0.3775 - mae: 0.3585  
+Epoch 32: val_loss improved from 0.33287 to 0.31947, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 173s 744ms/step - loss: 0.3752 - mae: 0.3586 - val_loss: 0.3195 - val_mae: 0.3003 - learning_rate: 0.0010
+Epoch 33/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 707ms/step - loss: 0.3684 - mae: 0.3560  
+Epoch 33: val_loss improved from 0.31947 to 0.29765, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 175s 753ms/step - loss: 0.3640 - mae: 0.3533 - val_loss: 0.2977 - val_mae: 0.2945 - learning_rate: 0.0010
+Epoch 34/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 684ms/step - loss: 0.3514 - mae: 0.3448  
+Epoch 34: val_loss did not improve from 0.29765
+233/233 ━━━━━━━━━━━━━━━━━━━━ 169s 725ms/step - loss: 0.3506 - mae: 0.3453 - val_loss: 0.3035 - val_mae: 0.2938 - learning_rate: 0.0010
+Epoch 35/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 683ms/step - loss: 0.3401 - mae: 0.3397  
+Epoch 35: val_loss improved from 0.29765 to 0.28893, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 169s 726ms/step - loss: 0.3445 - mae: 0.3408 - val_loss: 0.2889 - val_mae: 0.2973 - learning_rate: 0.0010
+Epoch 36/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 715ms/step - loss: 0.3295 - mae: 0.3351  
+Epoch 36: val_loss did not improve from 0.28893
+233/233 ━━━━━━━━━━━━━━━━━━━━ 179s 767ms/step - loss: 0.3311 - mae: 0.3351 - val_loss: 0.3103 - val_mae: 0.3461 - learning_rate: 0.0010
+Epoch 37/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 709ms/step - loss: 0.3293 - mae: 0.3377  
+Epoch 37: val_loss improved from 0.28893 to 0.27027, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 176s 756ms/step - loss: 0.3261 - mae: 0.3349 - val_loss: 0.2703 - val_mae: 0.2814 - learning_rate: 0.0010
+Epoch 38/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 685ms/step - loss: 0.3185 - mae: 0.3329  
+Epoch 38: val_loss did not improve from 0.27027
+233/233 ━━━━━━━━━━━━━━━━━━━━ 170s 731ms/step - loss: 0.3187 - mae: 0.3331 - val_loss: 0.2745 - val_mae: 0.3028 - learning_rate: 0.0010
+Epoch 39/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 742ms/step - loss: 0.3095 - mae: 0.3272  
+Epoch 39: val_loss improved from 0.27027 to 0.26745, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 185s 795ms/step - loss: 0.3080 - mae: 0.3269 - val_loss: 0.2675 - val_mae: 0.2906 - learning_rate: 0.0010
+Epoch 40/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 822ms/step - loss: 0.3002 - mae: 0.3262  
+Epoch 40: val_loss improved from 0.26745 to 0.26297, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 204s 874ms/step - loss: 0.2993 - mae: 0.3238 - val_loss: 0.2630 - val_mae: 0.2899 - learning_rate: 0.0010
+Epoch 41/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 797ms/step - loss: 0.2938 - mae: 0.3194  
+Epoch 41: val_loss improved from 0.26297 to 0.22123, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 198s 848ms/step - loss: 0.2946 - mae: 0.3211 - val_loss: 0.2212 - val_mae: 0.2530 - learning_rate: 0.0010
+Epoch 42/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 795ms/step - loss: 0.2771 - mae: 0.3128  
+Epoch 42: val_loss did not improve from 0.22123
+233/233 ━━━━━━━━━━━━━━━━━━━━ 198s 849ms/step - loss: 0.2807 - mae: 0.3142 - val_loss: 0.2358 - val_mae: 0.2682 - learning_rate: 0.0010
+Epoch 43/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 887ms/step - loss: 0.2814 - mae: 0.3182  
+Epoch 43: val_loss did not improve from 0.22123
+233/233 ━━━━━━━━━━━━━━━━━━━━ 220s 943ms/step - loss: 0.2793 - mae: 0.3144 - val_loss: 0.2388 - val_mae: 0.2889 - learning_rate: 0.0010
+Epoch 44/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 786ms/step - loss: 0.2687 - mae: 0.3107  
+Epoch 44: val_loss did not improve from 0.22123
+233/233 ━━━━━━━━━━━━━━━━━━━━ 195s 834ms/step - loss: 0.2719 - mae: 0.3117 - val_loss: 0.2587 - val_mae: 0.2853 - learning_rate: 0.0010
+Epoch 45/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 804ms/step - loss: 0.2630 - mae: 0.3052  
+Epoch 45: val_loss improved from 0.22123 to 0.20528, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 199s 854ms/step - loss: 0.2589 - mae: 0.3041 - val_loss: 0.2053 - val_mae: 0.2525 - learning_rate: 0.0010
+Epoch 46/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 790ms/step - loss: 0.2581 - mae: 0.3048  
+Epoch 46: val_loss improved from 0.20528 to 0.19986, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 196s 842ms/step - loss: 0.2582 - mae: 0.3041 - val_loss: 0.1999 - val_mae: 0.2601 - learning_rate: 0.0010
+Epoch 47/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 849ms/step - loss: 0.2447 - mae: 0.2974  
+Epoch 47: val_loss improved from 0.19986 to 0.19433, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 211s 907ms/step - loss: 0.2459 - mae: 0.2971 - val_loss: 0.1943 - val_mae: 0.2356 - learning_rate: 0.0010
+Epoch 48/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 848ms/step - loss: 0.2475 - mae: 0.2995  
+Epoch 48: val_loss did not improve from 0.19433
+233/233 ━━━━━━━━━━━━━━━━━━━━ 210s 900ms/step - loss: 0.2468 - mae: 0.2999 - val_loss: 0.2006 - val_mae: 0.2596 - learning_rate: 0.0010
+Epoch 49/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 826ms/step - loss: 0.2375 - mae: 0.2974  
+Epoch 49: val_loss improved from 0.19433 to 0.17756, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 205s 882ms/step - loss: 0.2368 - mae: 0.2962 - val_loss: 0.1776 - val_mae: 0.2307 - learning_rate: 0.0010
+Epoch 50/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 848ms/step - loss: 0.2286 - mae: 0.2903  
+Epoch 50: val_loss did not improve from 0.17756
+233/233 ━━━━━━━━━━━━━━━━━━━━ 211s 905ms/step - loss: 0.2317 - mae: 0.2918 - val_loss: 0.1973 - val_mae: 0.2555 - learning_rate: 0.0010
+Epoch 51/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 824ms/step - loss: 0.2335 - mae: 0.2962  
+Epoch 51: val_loss did not improve from 0.17756
+233/233 ━━━━━━━━━━━━━━━━━━━━ 205s 878ms/step - loss: 0.2314 - mae: 0.2931 - val_loss: 0.1858 - val_mae: 0.2411 - learning_rate: 0.0010
+Epoch 52/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 832ms/step - loss: 0.2261 - mae: 0.2901  
+Epoch 52: val_loss improved from 0.17756 to 0.17240, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 206s 884ms/step - loss: 0.2235 - mae: 0.2873 - val_loss: 0.1724 - val_mae: 0.2421 - learning_rate: 0.0010
+Epoch 53/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 719ms/step - loss: 0.2182 - mae: 0.2857  
+Epoch 53: val_loss did not improve from 0.17240
+233/233 ━━━━━━━━━━━━━━━━━━━━ 179s 767ms/step - loss: 0.2176 - mae: 0.2846 - val_loss: 0.1768 - val_mae: 0.2341 - learning_rate: 0.0010
+Epoch 54/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 700ms/step - loss: 0.2159 - mae: 0.2835  
+Epoch 54: val_loss did not improve from 0.17240
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 737ms/step - loss: 0.2158 - mae: 0.2833 - val_loss: 0.1810 - val_mae: 0.2419 - learning_rate: 0.0010
+Epoch 55/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 623ms/step - loss: 0.2116 - mae: 0.2804  
+Epoch 55: val_loss did not improve from 0.17240
+233/233 ━━━━━━━━━━━━━━━━━━━━ 154s 661ms/step - loss: 0.2104 - mae: 0.2801 - val_loss: 0.1891 - val_mae: 0.2664 - learning_rate: 0.0010
+Epoch 56/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 630ms/step - loss: 0.2125 - mae: 0.2827  
+Epoch 56: val_loss did not improve from 0.17240
+233/233 ━━━━━━━━━━━━━━━━━━━━ 156s 670ms/step - loss: 0.2114 - mae: 0.2830 - val_loss: 0.1762 - val_mae: 0.2469 - learning_rate: 0.0010
+Epoch 57/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 645ms/step - loss: 0.2022 - mae: 0.2778  
+Epoch 57: val_loss improved from 0.17240 to 0.15479, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 160s 685ms/step - loss: 0.2029 - mae: 0.2770 - val_loss: 0.1548 - val_mae: 0.2299 - learning_rate: 0.0010
+Epoch 58/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 627ms/step - loss: 0.1983 - mae: 0.2735  
+Epoch 58: val_loss did not improve from 0.15479
+233/233 ━━━━━━━━━━━━━━━━━━━━ 155s 665ms/step - loss: 0.1980 - mae: 0.2740 - val_loss: 0.1629 - val_mae: 0.2492 - learning_rate: 0.0010
+Epoch 59/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 624ms/step - loss: 0.2034 - mae: 0.2785  
+Epoch 59: val_loss improved from 0.15479 to 0.14750, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 154s 662ms/step - loss: 0.1991 - mae: 0.2752 - val_loss: 0.1475 - val_mae: 0.2261 - learning_rate: 0.0010
+Epoch 60/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 695ms/step - loss: 0.2008 - mae: 0.2773  
+Epoch 60: val_loss improved from 0.14750 to 0.14649, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 175s 751ms/step - loss: 0.1974 - mae: 0.2748 - val_loss: 0.1465 - val_mae: 0.2306 - learning_rate: 0.0010
+Epoch 61/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 796ms/step - loss: 0.1935 - mae: 0.2719  
+Epoch 61: val_loss did not improve from 0.14649
+233/233 ━━━━━━━━━━━━━━━━━━━━ 198s 848ms/step - loss: 0.1940 - mae: 0.2720 - val_loss: 0.1506 - val_mae: 0.2362 - learning_rate: 0.0010
+Epoch 62/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 838ms/step - loss: 0.1897 - mae: 0.2709  
+Epoch 62: val_loss did not improve from 0.14649
+233/233 ━━━━━━━━━━━━━━━━━━━━ 209s 895ms/step - loss: 0.1905 - mae: 0.2713 - val_loss: 0.1510 - val_mae: 0.2315 - learning_rate: 0.0010
+Epoch 63/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 842ms/step - loss: 0.1881 - mae: 0.2716  
+Epoch 63: val_loss did not improve from 0.14649
+233/233 ━━━━━━━━━━━━━━━━━━━━ 209s 896ms/step - loss: 0.1868 - mae: 0.2701 - val_loss: 0.1494 - val_mae: 0.2358 - learning_rate: 0.0010
+Epoch 64/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 817ms/step - loss: 0.1785 - mae: 0.2616  
+Epoch 64: val_loss improved from 0.14649 to 0.14083, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 203s 872ms/step - loss: 0.1813 - mae: 0.2647 - val_loss: 0.1408 - val_mae: 0.2172 - learning_rate: 0.0010
+Epoch 65/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 811ms/step - loss: 0.1814 - mae: 0.2676  
+Epoch 65: val_loss did not improve from 0.14083
+233/233 ━━━━━━━━━━━━━━━━━━━━ 202s 865ms/step - loss: 0.1818 - mae: 0.2678 - val_loss: 0.1545 - val_mae: 0.2514 - learning_rate: 0.0010
+Epoch 66/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 832ms/step - loss: 0.1817 - mae: 0.2644  
+Epoch 66: val_loss did not improve from 0.14083
+233/233 ━━━━━━━━━━━━━━━━━━━━ 206s 885ms/step - loss: 0.1799 - mae: 0.2656 - val_loss: 0.1578 - val_mae: 0.2341 - learning_rate: 0.0010
+Epoch 67/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 841ms/step - loss: 0.1804 - mae: 0.2643  
+Epoch 67: val_loss did not improve from 0.14083
+233/233 ━━━━━━━━━━━━━━━━━━━━ 208s 890ms/step - loss: 0.1787 - mae: 0.2643 - val_loss: 0.1552 - val_mae: 0.2555 - learning_rate: 0.0010
+Epoch 68/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 812ms/step - loss: 0.1732 - mae: 0.2598  
+Epoch 68: val_loss improved from 0.14083 to 0.13099, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 203s 869ms/step - loss: 0.1736 - mae: 0.2601 - val_loss: 0.1310 - val_mae: 0.2128 - learning_rate: 0.0010
+Epoch 69/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 699ms/step - loss: 0.1714 - mae: 0.2614  
+Epoch 69: val_loss did not improve from 0.13099
+233/233 ━━━━━━━━━━━━━━━━━━━━ 172s 737ms/step - loss: 0.1713 - mae: 0.2598 - val_loss: 0.1389 - val_mae: 0.2205 - learning_rate: 0.0010
+Epoch 70/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 635ms/step - loss: 0.1711 - mae: 0.2569  
+Epoch 70: val_loss did not improve from 0.13099
+233/233 ━━━━━━━━━━━━━━━━━━━━ 157s 673ms/step - loss: 0.1709 - mae: 0.2573 - val_loss: 0.1892 - val_mae: 0.2827 - learning_rate: 0.0010
+Epoch 71/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 638ms/step - loss: 0.1659 - mae: 0.2568  
+Epoch 71: val_loss did not improve from 0.13099
+233/233 ━━━━━━━━━━━━━━━━━━━━ 158s 678ms/step - loss: 0.1680 - mae: 0.2589 - val_loss: 0.1338 - val_mae: 0.2261 - learning_rate: 0.0010
+Epoch 72/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 640ms/step - loss: 0.1679 - mae: 0.2570  
+Epoch 72: val_loss did not improve from 0.13099
+233/233 ━━━━━━━━━━━━━━━━━━━━ 159s 681ms/step - loss: 0.1654 - mae: 0.2563 - val_loss: 0.1601 - val_mae: 0.2214 - learning_rate: 0.0010
+Epoch 73/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 652ms/step - loss: 0.1651 - mae: 0.2560  
+Epoch 73: val_loss did not improve from 0.13099
+233/233 ━━━━━━━━━━━━━━━━━━━━ 161s 691ms/step - loss: 0.1631 - mae: 0.2571 - val_loss: 0.1410 - val_mae: 0.2170 - learning_rate: 0.0010
+Epoch 74/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 640ms/step - loss: 0.1613 - mae: 0.2531  
+Epoch 74: val_loss did not improve from 0.13099
+233/233 ━━━━━━━━━━━━━━━━━━━━ 158s 677ms/step - loss: 0.1628 - mae: 0.2569 - val_loss: 0.1360 - val_mae: 0.2351 - learning_rate: 0.0010
+Epoch 75/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 670ms/step - loss: 0.1620 - mae: 0.2588  
+Epoch 75: val_loss improved from 0.13099 to 0.12554, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 166s 711ms/step - loss: 0.1624 - mae: 0.2556 - val_loss: 0.1255 - val_mae: 0.2089 - learning_rate: 0.0010
+Epoch 76/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 642ms/step - loss: 0.1573 - mae: 0.2507  
+Epoch 76: val_loss improved from 0.12554 to 0.11602, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 159s 684ms/step - loss: 0.1556 - mae: 0.2508 - val_loss: 0.1160 - val_mae: 0.2033 - learning_rate: 0.0010
+Epoch 77/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 653ms/step - loss: 0.1499 - mae: 0.2456  
+Epoch 77: val_loss did not improve from 0.11602
+233/233 ━━━━━━━━━━━━━━━━━━━━ 162s 696ms/step - loss: 0.1526 - mae: 0.2481 - val_loss: 0.1278 - val_mae: 0.2195 - learning_rate: 0.0010
+Epoch 78/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 644ms/step - loss: 0.1558 - mae: 0.2531  
+Epoch 78: val_loss did not improve from 0.11602
+233/233 ━━━━━━━━━━━━━━━━━━━━ 159s 682ms/step - loss: 0.1536 - mae: 0.2505 - val_loss: 0.1397 - val_mae: 0.2085 - learning_rate: 0.0010
+Epoch 79/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 635ms/step - loss: 0.1570 - mae: 0.2531  
+Epoch 79: val_loss did not improve from 0.11602
+233/233 ━━━━━━━━━━━━━━━━━━━━ 157s 673ms/step - loss: 0.1580 - mae: 0.2542 - val_loss: 0.1413 - val_mae: 0.2272 - learning_rate: 0.0010
+Epoch 80/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 637ms/step - loss: 0.1547 - mae: 0.2501  
+Epoch 80: val_loss improved from 0.11602 to 0.11134, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 158s 677ms/step - loss: 0.1521 - mae: 0.2490 - val_loss: 0.1113 - val_mae: 0.1971 - learning_rate: 0.0010
+Epoch 81/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 627ms/step - loss: 0.1450 - mae: 0.2424  
+Epoch 81: val_loss did not improve from 0.11134
+233/233 ━━━━━━━━━━━━━━━━━━━━ 155s 666ms/step - loss: 0.1477 - mae: 0.2450 - val_loss: 0.1267 - val_mae: 0.2260 - learning_rate: 0.0010
+Epoch 82/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 647ms/step - loss: 0.1474 - mae: 0.2470  
+Epoch 82: val_loss did not improve from 0.11134
+233/233 ━━━━━━━━━━━━━━━━━━━━ 160s 687ms/step - loss: 0.1477 - mae: 0.2463 - val_loss: 0.1245 - val_mae: 0.2004 - learning_rate: 0.0010
+Epoch 83/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 631ms/step - loss: 0.1425 - mae: 0.2425  
+Epoch 83: val_loss did not improve from 0.11134
+233/233 ━━━━━━━━━━━━━━━━━━━━ 156s 669ms/step - loss: 0.1428 - mae: 0.2425 - val_loss: 0.1124 - val_mae: 0.1944 - learning_rate: 0.0010
+Epoch 84/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 619ms/step - loss: 0.1419 - mae: 0.2432  
+Epoch 84: val_loss did not improve from 0.11134
+233/233 ━━━━━━━━━━━━━━━━━━━━ 153s 656ms/step - loss: 0.1414 - mae: 0.2427 - val_loss: 0.1191 - val_mae: 0.2190 - learning_rate: 0.0010
+Epoch 85/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 623ms/step - loss: 0.1428 - mae: 0.2433  
+Epoch 85: val_loss did not improve from 0.11134
+233/233 ━━━━━━━━━━━━━━━━━━━━ 154s 661ms/step - loss: 0.1422 - mae: 0.2431 - val_loss: 0.1321 - val_mae: 0.2381 - learning_rate: 0.0010
+Epoch 86/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 626ms/step - loss: 0.1388 - mae: 0.2405  
+Epoch 86: val_loss did not improve from 0.11134
+233/233 ━━━━━━━━━━━━━━━━━━━━ 155s 665ms/step - loss: 0.1397 - mae: 0.2413 - val_loss: 0.1124 - val_mae: 0.2159 - learning_rate: 0.0010
+Epoch 87/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 647ms/step - loss: 0.1388 - mae: 0.2417  
+Epoch 87: val_loss did not improve from 0.11134
+233/233 ━━━━━━━━━━━━━━━━━━━━ 160s 687ms/step - loss: 0.1391 - mae: 0.2414 - val_loss: 0.1244 - val_mae: 0.2316 - learning_rate: 0.0010
+Epoch 88/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 713ms/step - loss: 0.1334 - mae: 0.2370  
+Epoch 88: val_loss improved from 0.11134 to 0.10685, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 178s 763ms/step - loss: 0.1360 - mae: 0.2383 - val_loss: 0.1068 - val_mae: 0.1959 - learning_rate: 0.0010
+Epoch 89/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 755ms/step - loss: 0.1363 - mae: 0.2391  
+Epoch 89: val_loss did not improve from 0.10685
+233/233 ━━━━━━━━━━━━━━━━━━━━ 187s 804ms/step - loss: 0.1403 - mae: 0.2409 - val_loss: 0.1430 - val_mae: 0.2436 - learning_rate: 0.0010
+Epoch 90/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 732ms/step - loss: 0.1375 - mae: 0.2376  
+Epoch 90: val_loss did not improve from 0.10685
+233/233 ━━━━━━━━━━━━━━━━━━━━ 182s 780ms/step - loss: 0.1366 - mae: 0.2371 - val_loss: 0.1094 - val_mae: 0.1954 - learning_rate: 0.0010
+Epoch 91/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 687ms/step - loss: 0.1341 - mae: 0.2360  
+Epoch 91: val_loss did not improve from 0.10685
+233/233 ━━━━━━━━━━━━━━━━━━━━ 170s 728ms/step - loss: 0.1374 - mae: 0.2386 - val_loss: 0.1079 - val_mae: 0.1996 - learning_rate: 0.0010
+Epoch 92/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 740ms/step - loss: 0.1327 - mae: 0.2356  
+Epoch 92: val_loss did not improve from 0.10685
+233/233 ━━━━━━━━━━━━━━━━━━━━ 184s 789ms/step - loss: 0.1324 - mae: 0.2342 - val_loss: 0.1179 - val_mae: 0.2084 - learning_rate: 0.0010
+Epoch 93/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 753ms/step - loss: 0.1321 - mae: 0.2362  
+Epoch 93: val_loss did not improve from 0.10685
+233/233 ━━━━━━━━━━━━━━━━━━━━ 187s 803ms/step - loss: 0.1315 - mae: 0.2359 - val_loss: 0.1233 - val_mae: 0.2081 - learning_rate: 0.0010
+Epoch 94/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 796ms/step - loss: 0.1302 - mae: 0.2346  
+Epoch 94: val_loss did not improve from 0.10685
+233/233 ━━━━━━━━━━━━━━━━━━━━ 198s 850ms/step - loss: 0.1283 - mae: 0.2318 - val_loss: 0.1193 - val_mae: 0.2197 - learning_rate: 0.0010
+Epoch 95/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 773ms/step - loss: 0.1266 - mae: 0.2322  
+Epoch 95: val_loss did not improve from 0.10685
+233/233 ━━━━━━━━━━━━━━━━━━━━ 192s 822ms/step - loss: 0.1292 - mae: 0.2340 - val_loss: 0.1427 - val_mae: 0.2627 - learning_rate: 0.0010
+Epoch 96/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 669ms/step - loss: 0.1252 - mae: 0.2299  
+Epoch 96: val_loss improved from 0.10685 to 0.10004, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 166s 712ms/step - loss: 0.1263 - mae: 0.2299 - val_loss: 0.1000 - val_mae: 0.1988 - learning_rate: 0.0010
+Epoch 97/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 750ms/step - loss: 0.1252 - mae: 0.2294  
+Epoch 97: val_loss did not improve from 0.10004
+233/233 ━━━━━━━━━━━━━━━━━━━━ 185s 796ms/step - loss: 0.1244 - mae: 0.2286 - val_loss: 0.1135 - val_mae: 0.1843 - learning_rate: 0.0010
+Epoch 98/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 723ms/step - loss: 0.1273 - mae: 0.2320  
+Epoch 98: val_loss did not improve from 0.10004
+233/233 ━━━━━━━━━━━━━━━━━━━━ 179s 770ms/step - loss: 0.1255 - mae: 0.2307 - val_loss: 0.1282 - val_mae: 0.2449 - learning_rate: 0.0010
+Epoch 99/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 722ms/step - loss: 0.1261 - mae: 0.2320  
+Epoch 99: val_loss improved from 0.10004 to 0.09846, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 179s 770ms/step - loss: 0.1270 - mae: 0.2323 - val_loss: 0.0985 - val_mae: 0.1911 - learning_rate: 0.0010
+Epoch 100/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 717ms/step - loss: 0.1233 - mae: 0.2299  
+Epoch 100: val_loss did not improve from 0.09846
+233/233 ━━━━━━━━━━━━━━━━━━━━ 178s 764ms/step - loss: 0.1233 - mae: 0.2279 - val_loss: 0.1070 - val_mae: 0.1975 - learning_rate: 0.0010
+Epoch 101/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 750ms/step - loss: 0.1224 - mae: 0.2276  
+Epoch 101: val_loss improved from 0.09846 to 0.09233, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 186s 799ms/step - loss: 0.1228 - mae: 0.2277 - val_loss: 0.0923 - val_mae: 0.1795 - learning_rate: 0.0010
+Epoch 102/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 787ms/step - loss: 0.1205 - mae: 0.2295  
+Epoch 102: val_loss did not improve from 0.09233
+233/233 ━━━━━━━━━━━━━━━━━━━━ 195s 837ms/step - loss: 0.1212 - mae: 0.2293 - val_loss: 0.1072 - val_mae: 0.2157 - learning_rate: 0.0010
+Epoch 103/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 774ms/step - loss: 0.1215 - mae: 0.2291  
+Epoch 103: val_loss did not improve from 0.09233
+233/233 ━━━━━━━━━━━━━━━━━━━━ 193s 827ms/step - loss: 0.1241 - mae: 0.2309 - val_loss: 0.1297 - val_mae: 0.2313 - learning_rate: 0.0010
+Epoch 104/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 741ms/step - loss: 0.1212 - mae: 0.2276  
+Epoch 104: val_loss did not improve from 0.09233
+233/233 ━━━━━━━━━━━━━━━━━━━━ 185s 793ms/step - loss: 0.1190 - mae: 0.2252 - val_loss: 0.0926 - val_mae: 0.1910 - learning_rate: 0.0010
+Epoch 105/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 736ms/step - loss: 0.1198 - mae: 0.2261  
+Epoch 105: val_loss improved from 0.09233 to 0.09180, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 183s 784ms/step - loss: 0.1221 - mae: 0.2281 - val_loss: 0.0918 - val_mae: 0.1837 - learning_rate: 0.0010
+Epoch 106/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 668ms/step - loss: 0.1187 - mae: 0.2239  
+Epoch 106: val_loss did not improve from 0.09180
+233/233 ━━━━━━━━━━━━━━━━━━━━ 165s 709ms/step - loss: 0.1198 - mae: 0.2253 - val_loss: 0.1056 - val_mae: 0.2130 - learning_rate: 0.0010
+Epoch 107/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 639ms/step - loss: 0.1152 - mae: 0.2223  
+Epoch 107: val_loss did not improve from 0.09180
+233/233 ━━━━━━━━━━━━━━━━━━━━ 158s 678ms/step - loss: 0.1160 - mae: 0.2227 - val_loss: 0.1092 - val_mae: 0.2296 - learning_rate: 0.0010
+Epoch 108/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 631ms/step - loss: 0.1116 - mae: 0.2205  
+Epoch 108: val_loss did not improve from 0.09180
+233/233 ━━━━━━━━━━━━━━━━━━━━ 156s 670ms/step - loss: 0.1146 - mae: 0.2212 - val_loss: 0.0967 - val_mae: 0.1977 - learning_rate: 0.0010
+Epoch 109/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 628ms/step - loss: 0.1174 - mae: 0.2231  
+Epoch 109: val_loss did not improve from 0.09180
+233/233 ━━━━━━━━━━━━━━━━━━━━ 155s 667ms/step - loss: 0.1168 - mae: 0.2227 - val_loss: 0.0977 - val_mae: 0.1982 - learning_rate: 0.0010
+Epoch 110/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 631ms/step - loss: 0.1169 - mae: 0.2223  
+Epoch 110: val_loss did not improve from 0.09180
+233/233 ━━━━━━━━━━━━━━━━━━━━ 156s 672ms/step - loss: 0.1171 - mae: 0.2237 - val_loss: 0.0931 - val_mae: 0.1886 - learning_rate: 0.0010
+Epoch 111/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 646ms/step - loss: 0.1121 - mae: 0.2225  
+Epoch 111: val_loss did not improve from 0.09180
+233/233 ━━━━━━━━━━━━━━━━━━━━ 161s 690ms/step - loss: 0.1133 - mae: 0.2226 - val_loss: 0.1050 - val_mae: 0.2102 - learning_rate: 0.0010
+Epoch 112/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 740ms/step - loss: 0.1156 - mae: 0.2199  
+Epoch 112: val_loss did not improve from 0.09180
+233/233 ━━━━━━━━━━━━━━━━━━━━ 183s 787ms/step - loss: 0.1144 - mae: 0.2188 - val_loss: 0.1390 - val_mae: 0.2587 - learning_rate: 0.0010
+Epoch 113/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 729ms/step - loss: 0.1161 - mae: 0.2251  
+Epoch 113: val_loss improved from 0.09180 to 0.08442, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 182s 783ms/step - loss: 0.1129 - mae: 0.2214 - val_loss: 0.0844 - val_mae: 0.1755 - learning_rate: 0.0010
+Epoch 114/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 863ms/step - loss: 0.1099 - mae: 0.2165  
+Epoch 114: val_loss did not improve from 0.08442
+233/233 ━━━━━━━━━━━━━━━━━━━━ 215s 922ms/step - loss: 0.1102 - mae: 0.2183 - val_loss: 0.0921 - val_mae: 0.1901 - learning_rate: 0.0010
+Epoch 115/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 779ms/step - loss: 0.1094 - mae: 0.2170  
+Epoch 115: val_loss did not improve from 0.08442
+233/233 ━━━━━━━━━━━━━━━━━━━━ 192s 824ms/step - loss: 0.1120 - mae: 0.2184 - val_loss: 0.0990 - val_mae: 0.1898 - learning_rate: 0.0010
+Epoch 116/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 744ms/step - loss: 0.1096 - mae: 0.2184  
+Epoch 116: val_loss did not improve from 0.08442
+233/233 ━━━━━━━━━━━━━━━━━━━━ 184s 788ms/step - loss: 0.1110 - mae: 0.2210 - val_loss: 0.0984 - val_mae: 0.1977 - learning_rate: 0.0010
+Epoch 117/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 719ms/step - loss: 0.1087 - mae: 0.2178  
+Epoch 117: val_loss did not improve from 0.08442
+233/233 ━━━━━━━━━━━━━━━━━━━━ 178s 765ms/step - loss: 0.1086 - mae: 0.2177 - val_loss: 0.1034 - val_mae: 0.2083 - learning_rate: 0.0010
+Epoch 118/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 723ms/step - loss: 0.1052 - mae: 0.2131  
+Epoch 118: val_loss did not improve from 0.08442
+233/233 ━━━━━━━━━━━━━━━━━━━━ 179s 770ms/step - loss: 0.1086 - mae: 0.2173 - val_loss: 0.1503 - val_mae: 0.2303 - learning_rate: 0.0010
+Epoch 119/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 725ms/step - loss: 0.1256 - mae: 0.2358  
+Epoch 119: val_loss did not improve from 0.08442
+233/233 ━━━━━━━━━━━━━━━━━━━━ 179s 770ms/step - loss: 0.1161 - mae: 0.2255 - val_loss: 0.0849 - val_mae: 0.1676 - learning_rate: 0.0010
+Epoch 120/120
+233/233 ━━━━━━━━━━━━━━━━━━━━ 0s 679ms/step - loss: 0.1063 - mae: 0.2140  
+Epoch 120: val_loss improved from 0.08442 to 0.08359, saving model to best_vcg_autoencoder.keras
+233/233 ━━━━━━━━━━━━━━━━━━━━ 168s 721ms/step - loss: 0.1060 - mae: 0.2143 - val_loss: 0.0836 - val_mae: 0.1773 - learning_rate: 0.0010
+Restoring model weights from the end of the best epoch: 120.
+
+[STEP 6] Evaluating performance...
+
+[AVERAGE PERFORMANCE ACROSS TEST SAMPLES]
+
+======================================================================
+PERFORMANCE METRICS
+======================================================================
+Compression Ratio (CR):           30.00
+Mean Squared Error (MSE):         0.075686
+Root Mean Square Error (RMSE):    0.2606
+Normalized MSE (NMSE):            0.099656
+Percentage RMS Difference (PRD):  28.08%
+PRD Normalized (PRDN):            2.30
+Signal-to-Noise Ratio (SNR):      11.23 dB
+Peak SNR (PSNR):                  25.05 dB
+Quality Score (QS):               1.12
+======================================================================
+
+[STEP 7] Creating visualizations...
+  ✓ Saved: training_history.png
+  ✓ Saved: vcg_comparison.png
+  ✓ Saved: vcg_3d_original.png
+  ✓ Saved: vcg_3d_reconstructed.png
+
+[STEP 8] Saving models...
+Models saved: vcg_encoder.keras, vcg_decoder.keras
+
+======================================================================
+PIPELINE COMPLETED SUCCESSFULLY!
+======================================================================
+
+Generated files:
+  - best_vcg_autoencoder.keras (Complete model)
+  - vcg_encoder.keras (Encoder only)
+  - vcg_decoder.keras (Decoder only)
+  - vcg_autoencoder_pi.tflite (Raspberry Pi optimized)
+
+Visualization files:
+  - training_history.png
+  - vcg_comparison.png
+  - vcg_3d_original.png
+  - vcg_3d_reconstructed.png
+
+To view visualizations, open the PNG files in your file explorer.
+
+📊 Performance Summary:
+    Compression Ratio: 30.00:1
+    PRD: 28.08%
+    SNR: 11.23 dB
+    Quality Score: 1.12
+======================================================================

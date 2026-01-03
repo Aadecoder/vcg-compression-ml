@@ -1,0 +1,10 @@
+numpy
+wfdb
+PyWavelets
+scipy
+tensorflow
+tensorflow-addons
+tensorflow_keras
+matplotlib
+pandas
+scikit-learn
