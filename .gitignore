@@ -1,4 +1,4 @@
 ptb-diagnostic-ecg-database-1.0.0/
-/our-model/vcg_data/
+/model/vcg_data/
 vcg-venv/
 __pycache__/
