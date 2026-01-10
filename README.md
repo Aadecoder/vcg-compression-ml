@@ -150,7 +150,7 @@ The code generates:
 
 ---
 
-## 🛠 Requirements (Core)
+## Requirements (Core)
 
 - Python 3.9+
 - NumPy
@@ -161,6 +161,14 @@ The code generates:
 - matplotlib
 - PyWavelets
 
+---
+
+## References
+
+This project is based on and inspired by the methodology described in the following research paper:
+
+https://www.sciencedirect.com/science/article/pii/S1746809425013072
+ 
 ---
 
 ## Author
