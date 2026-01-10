@@ -88,14 +88,14 @@ Implemented in `PerformanceEvaluator`, following standard ECG/VCG compression li
 
 ### Example Results (Average over test samples)
 
-CR = 30.00
-MSE = 0.0757
-RMSE = 0.2606
-NMSE = 0.0997
-PRD = 28.08 %
-SNR = 11.23 dB
-PSNR = 25.05 dB
-QS = 1.12
+- CR = 30.00
+- MSE = 0.0757
+- RMSE = 0.2606
+- NMSE = 0.0997
+- PRD = 28.08 %
+- SNR = 11.23 dB
+- PSNR = 25.05 dB
+- QS = 1.12
 
 These values indicate **acceptable biomedical compression quality** at a high compression ratio.
 
