@@ -119,23 +119,24 @@ The code generates:
 ---
 
 ## Project Structure
-│
+```text
 ├── model
-│   ├── best_vcg_autoencoder.keras // best autoencoder model
-│   ├── output.txt                 // Output and Performance measure of the Model
-│   ├── training_history.png
-│   ├── vcg_3d_original.png
-│   ├── vcg_3d_reconstructed.png
-│   ├── vcg_comparison.png
-│   ├── vcg_compression_ml.py     // Main pipeline
-│   ├── vcg_decoder.keras         // Decoder
-│   └── vcg_encoder.keras         // Encoder
-├── README.md
-├── requirements.txt              // requirements file for python libraries
-├── vcg_compression_model(1).ipynb
-├── low-pass-butterworth-filter.md
-├── sliding-window.md
-└── z-score-normalization.md
+│   ├── best_vcg_autoencoder.keras      # Best trained autoencoder model
+│   ├── output.txt                     # Model output and performance metrics
+│   ├── training_history.png           # Training and validation loss curves
+│   ├── vcg_3d_original.png            # 3D plot of original VCG signal
+│   ├── vcg_3d_reconstructed.png       # 3D plot of reconstructed VCG signal
+│   ├── vcg_comparison.png             # Original vs reconstructed VCG waveforms
+│   ├── vcg_compression_ml.py          # Main training and evaluation pipeline
+│   ├── vcg_decoder.keras              # Trained decoder model
+│   └── vcg_encoder.keras              # Trained encoder model
+├── README.md                          # Project documentation
+├── requirements.txt                   # Python dependencies
+├── vcg_compression_model(1).ipynb     # Jupyter notebook version of the pipeline
+├── low-pass-butterworth-filter.md     # Explanation of Butterworth filtering
+├── sliding-window.md                  # Explanation of sliding window segmentation
+└── z-score-normalization.md           # Explanation of z-score normalization
+```
 
 ---
 
